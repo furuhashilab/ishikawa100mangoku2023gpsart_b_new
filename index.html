@@ -1,120 +1,489 @@
-<html>
-  <head></head>
-  <body><iframe width="100%" height="100%" src="https://ebgiidfdea.reearth.io" frameBorder="0"></iframe>;</body>
-</html>
-
-# ishikawa100mangoku2023gpsart_b
-9月ハッカソン　チームB専用レポジトリ
-
-var config = {
-    style: 'mapbox://styles/mapbox/streets-v11',
-    accessToken: 'pk.eyJ1IjoiemF3YXRhaXl1IiwiYSI6ImNsbXBzaTE2czB3M3MybG85N2Y5NDMwMmQifQ.rRQz5n8yD6Nhw04dbf2c2Q',
-    showMarkers: true,
-    markerColor: '#3FB1CE',
-    //projection: 'equirectangular',
-    //Read more about available projections here
-    //https://docs.mapbox.com/mapbox-gl-js/example/projections/
-    inset: true,
-    theme: 'dark',
-    use3dTerrain: false, //set true for enabling 3D maps.
-    auto: false,
-    title: 'The Title Text of this Story',
-    subtitle: 'A descriptive and interesting subtitle to draw in the reader',
-    byline: 'By a Digital Storyteller',
-    footer: 'Source: source citations, etc. <br> Created using <a href="https://github.com/mapbox/storytelling" target="_blank">Mapbox Storytelling</a> template.',
-    chapters: [
-        {
-            id: 'slug-style-id',
-            alignment: 'left',
-            hidden: false,
-            title: 'Display Title',
-            image: './path/to/image/source.png',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            location: {
-                center: [-122.418398, 37.759483],
-                zoom: 8.5,
-                pitch: 60,
-                bearing: 0
-            },
-            mapAnimation: 'flyTo',
-            rotateAnimation: false,
-            callback: '',
-            onChapterEnter: [
-                // {
-                //     layer: 'layer-name',
-                //     opacity: 1,
-                //     duration: 5000
-                // }
-            ],
-            onChapterExit: [
-                // {
-                //     layer: 'layer-name',
-                //     opacity: 0
-                // }
-            ]
-        },
-        {
-            id: 'second-identifier',
-            alignment: 'right',
-            hidden: false,
-            title: 'Second Title',
-            image: './path/to/image/source.png',
-            description: 'Copy these sections to add to your story.',
-            location: {
-                center: [-77.020636, 38.886900],
-                zoom: 8.5,
-                pitch: 60,
-                bearing: -43.2,
-                // flyTo additional controls-
-                // These options control the flight curve, making it move
-                // slowly and zoom out almost completely before starting
-                // to pan.
-                //speed: 2, // make the flying slow
-                //curve: 1, // change the speed at which it zooms out
-            },
-            mapAnimation: 'flyTo',
-            rotateAnimation: true,
-            callback: '',
-            onChapterEnter: [],
-            onChapterExit: []
-        },
-        {
-            id: 'third-identifier',
-            alignment: 'left',
-            hidden: false,
-            title: 'Third Title',
-            image: './path/to/image/source.png',
-            description: 'Copy these sections to add to your story.',
-            location: {
-                center: [6.15116, 46.20595],
-                zoom: 12.52,
-                pitch: 8.01,
-                bearing: 0.00
-            },
-            mapAnimation: 'flyTo',
-            rotateAnimation: false,
-            callback: '',
-            onChapterEnter: [],
-            onChapterExit: []
-        },
-        {
-            id: 'fourth-chapter',
-            alignment: 'fully',
-            hidden: false,
-            title: 'Third Title',
-            image: './path/to/image/source.png',
-            description: 'Copy these sections to add to your story.',
-            location: {
-                center: [-58.54195, -34.71600],
-                zoom: 4,
-                pitch: 0,
-                bearing: 0
-            },
-            mapAnimation: 'flyTo',
-            rotateAnimation: false,
-            callback: '',
-            onChapterEnter: [],
-            onChapterExit: []
+<html><head>
+    <meta charset="utf-8">
+    <title>Mapbox Storytelling</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/mapbox/assembly/publisher-staging/src/svgs/mapbox.svg">
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://unpkg.com/intersection-observer@0.12.0/intersection-observer.js"></script>
+    <script src="https://unpkg.com/scrollama"></script>
+    <style>
+        body {
+            margin:0;
+            padding:0;
+            font-family: sans-serif;
         }
-    ]
-};
+        a, a:hover, a:visited {
+            color: #0071bc;
+        }
+        #map {
+            top:0;
+            height: 100vh;
+            width:100vw;
+            position: fixed;
+        }
+        #mapInset {
+            bottom:50px;
+            right:30px;
+            height: 180px;
+            width:250px;
+            max-width:100%;
+            position: fixed;
+            z-index: 1;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+        }
+        #mapInset .mapboxgl-ctrl-bottom-left{
+            display: none;
+        }
+        @media (max-width: 500px) {
+            #mapInset {
+                display: none;
+            }
+        }
+        #header {
+            margin: auto;
+            width: 100%;
+            position: relative;
+            z-index: 5;
+        }
+        #header h1, #header h2, #header p {
+            margin: 0;
+            padding: 2vh 2vw;
+            text-align: center;
+        }
+        #footer {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+            position: relative;
+            z-index: 5;
+        }
+        #features {
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+        }
+        .hidden {
+            visibility: hidden;
+        }
+        .centered {
+            width: 50vw;
+            margin: 0 auto;
+        }
+        .lefty {
+            width: 33vw;
+            margin-left: 5vw;
+        }
+        .righty {
+            width: 33vw;
+            margin-left: 62vw;
+        }
+        .fully {
+            width: 100%;
+            margin: auto;
+        }
+        .light {
+            color: #444;
+            background-color: #fafafa;
+        }
+        .dark {
+            color: #fafafa;
+            background-color: #444;
+        }
+        .step {
+            padding-bottom: 50vh;
+            /* margin-bottom: 10vh; */
+            opacity: 0.25;
+        }
+        .step.active {
+            opacity: 0.9;
+        }
+
+        .step div {
+            padding:  25px 50px;
+            line-height: 25px;
+            font-size: 13px;
+        }
+
+        .step img {
+            width: 100%;
+        }
+
+        @media (max-width: 750px) {
+            .centered, .lefty, .righty, .fully {
+                width: 90vw;
+                margin: 0 auto;
+            }
+        }
+
+        /* Fix issue on mobile browser where scroll breaks  */
+        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan,
+        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan .mapboxgl-canvas {
+            touch-action: unset;
+        }
+
+        </style>
+</head>
+<body>
+
+<div id="map" class="mapboxgl-map"><div class="mapboxgl-canary" style="visibility: hidden;"></div><div class="mapboxgl-canvas-container"><canvas class="mapboxgl-canvas" tabindex="0" aria-label="Map" role="region" width="1089" height="894" style="width: 725.333px; height: 595.333px;"></canvas></div><div class="mapboxgl-control-container"><div class="mapboxgl-ctrl-top-left"></div><div class="mapboxgl-ctrl-top-right"></div><div class="mapboxgl-ctrl-bottom-left"><div class="mapboxgl-ctrl" style="display: block;"><a class="mapboxgl-ctrl-logo" target="_blank" rel="noopener nofollow" href="https://www.mapbox.com/" aria-label="Mapbox logo"></a></div></div><div class="mapboxgl-ctrl-bottom-right"><div class="mapboxgl-ctrl mapboxgl-ctrl-attrib"><button class="mapboxgl-ctrl-attrib-button" type="button" aria-label="Toggle attribution"><span class="mapboxgl-ctrl-icon" aria-hidden="true" title="Toggle attribution"></span></button><div class="mapboxgl-ctrl-attrib-inner" role="list"><a href="https://www.mapbox.com/about/maps/" target="_blank" title="Mapbox" aria-label="Mapbox">© Mapbox</a> <a href="https://www.openstreetmap.org/about/" target="_blank" title="OpenStreetMap" aria-label="OpenStreetMap">© OpenStreetMap</a> <a class="mapbox-improve-map" href="https://apps.mapbox.com/feedback/?owner=shio2&amp;id=clnijjlva01mh01r72xild7q4&amp;access_token=pk.eyJ1Ijoic2hpbzIiLCJhIjoiY2xna3Nyd3J2MDY5dDNzcDZ2cXJtaHFobyJ9.izmy0oit5jVyL6NR7QEMUg#/137.249/37.195/7.5/0/45" target="_blank" aria-label="Map feedback" rel="noopener nofollow">Improve this map</a></div></div></div></div></div>
+<div id="mapInset"></div>
+<div id="story"><div class="dark" id="header"><h1>モーゼが石川に辿り着いた時</h1><h2>モーゼは40年の歳月をかけユダヤの民衆をイスラエルの地へ導いた後、シナイ山に登りました。そこから不思議な「天浮船」に乗ったモーゼは能登宝達山にたどり着き、583歳までの余生を石川で過ごしたとされているそうです。そこで、石川に辿り着いたモーゼは一体、どこに行ったのか。気になりますよね？以下のストーリーテリングにてご紹介します</h2><p>By チームB しおり　たいゆう</p></div><div id="features"><div id="slug-style-id" class="step righty" data-scrollama-index="0"><div class="dark"><h3>珠洲市</h3><img src="https://user-images.githubusercontent.com/106800258/271775935-878d7e77-5811-4229-b8ef-755d32d6fe25.PNG"><p>長く続いたコロナ禍や地震、豪雨災害を乗り越え、皆が活力を取り戻すために。いしかわ百万石文化祭・新幹線開業・世界ジオパークなど皆で盛り上げるために。オール石川のチジョウエール、ONE TEAMを描きます。</p></div></div><div id="second-identifier" class="step righty" data-scrollama-index="1"><div class="dark"><h3>能登町のイカキングのモニュメント</h3><img src="https://user-images.githubusercontent.com/106800258/271774514-045546f1-efcb-4188-bba2-713b27f3c0d4.jpg"><p>日本有数のイカ釣り漁港がある能登町。漁港のそばの巨大モニュメント、イカキングは一躍話題となりました。日本百景に選ばれた九十九湾など風光明媚な里山里海を駆け巡り、能登町に巨大イカキングを描きます。【モーゼが訪れる理由：地域のシンボルともいえる場所から旅を始め、地元の文化を学ぶため。】</p></div></div><div id="third-identifier" class="step lefty" data-scrollama-index="2"><div class="dark"><h3>珠洲市の見附島</h3><img src="https://user-images.githubusercontent.com/106800258/271774442-5fd83f57-d785-48d5-8813-c921dfad2ff9.jpg"><p>2023年5月、大きな震災にあった珠洲。夏にはトライアスロン珠洲、秋には奥能登国際芸術祭が数年ぶりに開催されます。スポーツとアートの力、そしてみんなの強い気持ちと団結で乗り越えていきましょう。がんばろうスズ【モーゼが訪れる理由：天然の美しさを感じ、神の創造を賞賛するため。】</p></div></div><div id="fourth-identifier" class="step righty" data-scrollama-index="3"><div class="dark"><h3>珠洲市の猿の顔に似ている海岸線</h3><img src="https://user-images.githubusercontent.com/106800258/271774465-d29adf58-b737-46b0-ab00-10f5e836c2df.jpg"><p>奥能登には猿にまつわる伝説・伝承が多数残っています。そして珠洲の海岸線は猿の顔そのもの。激坂の山越え、趣の異なる外浦と内浦の海岸線、風情ある珠洲の街並みとバリエーションに富んだコースになっています。【モーゼが訪れる理由：自然のユニークな創造物を目の当たりにし、神の力を感じるため。】</p></div></div><div id="fifth-identifier" class="step lefty" data-scrollama-index="4"><div class="dark"><h3>輪島市の輪島漆芸美術館</h3><img src="https://user-images.githubusercontent.com/106800258/271774567-12f2e0d3-7bc3-4822-8566-c115a14a870c.jpg"><p>輪島漆芸美術館のゆるキャラ、わんじま。輪島塗のお椀がモチーフです。輪島漆芸美術館をスタートし、輪島塗スポットや輪島の朝市など観光名所を巡りながら出来上がったアートは、手に輪島塗のお箸を持ったわんじまです。【モーゼが訪れる理由：地元の伝統芸術を尊重し、文化の理解を深めるため。】</p></div></div><div id="sixth-identifier" class="step righty" data-scrollama-index="5"><div class="dark"><h3>輪島市の総持寺祖院</h3><img src="https://user-images.githubusercontent.com/106800258/271774600-b6069a16-db8e-486f-992e-377de2b03144.jpg"><p>かつて北前船の寄港地として栄えた輪島市門前にある総持寺祖院。海を通じて禅の文化を全国に広めました。また總持寺峨山禅師は、羽咋市永光寺の住職を兼ねており、両寺を結ぶ13里（52km）を往来していたそうです。【モーゼが訪れる理由：静寂と平和を求め、精神的な洞察を得るため。】</p></div></div><div id="seventh-identifier" class="step righty" data-scrollama-index="6"><div class="dark"><h3>穴水町の根来のボラ待ちやぐら</h3><img src="https://user-images.githubusercontent.com/106800258/271774625-7ba279db-e9da-4423-b4e6-b4f971cc54bf.jpg"><p>終日、やぐらの上から海を見張り、魚群がくると網をたぐるという江戸時代からの伝統的漁法のボラ待ちやぐら。最盛期には40基のボラ待ちやぐらがあったそうです。ボラ待ちやぐら3基を巡ってやぐらのアートを描きます。【モーゼが訪れる理由：地域の伝統と歴史を学ぶため。】</p></div></div><div id="eighth-identifier" class="step lefty" data-scrollama-index="7"><div class="dark"><h3>志賀町のころ柿の里・しか</h3><img src="https://user-images.githubusercontent.com/106800258/271774648-b57a4650-3287-4aca-ac78-bfe91ce25ba7.jpg"><p>能登を代表する特産品、志賀町のころ柿は品種「最勝」を原料柿として、古くから伝わる伝統技法を用いて製造された糖度の高い干柿です。 志賀町の農家の軒先では干し柿がオレンジのカーテンのように吊るされています。【モーゼが訪れる理由：地元の農業を尊重し、その恵みに感謝するため。】</p></div></div><div id="ninth-identifier" class="step righty" data-scrollama-index="8"><div class="dark"><h3>七尾市の七尾城</h3><img src="https://user-images.githubusercontent.com/106800258/271774681-522659ea-fd33-439a-b13f-faf68b3839ec.jpg"><p>日本一のでか山を誇る青柏祭の起源は平安時代。疫病退散を祈願する天王信仰を背景に伝承されています。青柏祭の大地主神社や小丸山城址公園、一本杉通り、山の寺寺院群、国分寺跡を巡り七尾城にでか山を引き上げます。【モーゼが訪れる理由：歴史的な地を訪れ、その地の歴史を尊敬するため。】</p></div></div><div id="tenth-identifier" class="step righty" data-scrollama-index="9"><div class="dark"><h3>七尾市の能登島</h3><img src="https://user-images.githubusercontent.com/106800258/271774762-bed1a1c1-7f5c-4607-92aa-46e1fec6f0a5.jpg"><p>七尾湾の中に浮かんでいる能登島の海岸線は、美しい海とおだやかな入江、荒波に削られた岩々など変化にとんだ景色が広がっています。海岸線の道路をつないでいくと大きなうさぎが浮かびあがること、ご存じでしたか？【モーゼが訪れる理由：自然の豊かさを体験し、地域の生態系を学ぶため。】</p></div></div><div id="eleventh-identifier" class="step righty" data-scrollama-index="10"><div class="dark"><h3>七尾市の和倉温泉</h3><img src="https://user-images.githubusercontent.com/106800258/271774797-623aafee-f97d-4669-9d0e-133529649470.jpg"><p>日本では珍しい海から温泉が湧き出ている和倉温泉。七尾湾で一羽の白鷺が傷を癒していたのを漁師夫婦が見つけ、不思議に思い近づいてみると海中から温泉が湧き出ていた。これが和倉温泉の発祥とされています。【モーゼが訪れる理由：体の癒しと精神の安らぎを求めるため。】</p></div></div><div id="twelfth-identifier" class="step lefty" data-scrollama-index="11"><div class="dark"><h3>中能登町の杉谷チャノバタケ遺跡</h3><img src="https://user-images.githubusercontent.com/106800258/271774847-935b242e-d75b-4eb7-8526-57ddb6acda7b.jpg"><p>おにぎりの里　中能登町。その由来は日本最古のおにぎりが出土したことから。1987年に弥生時代の竪穴住居跡からチマキ状炭化米の塊（おにぎりの化石）が発見されました。以降、おにぎりで町おこしがおこなわれています、【モーゼが訪れる理由：地域の歴史を深く知り、過去の人々の生活を理解するため。】</p></div></div><div id="thirteenth-identifier" class="step lefty" data-scrollama-index="12"><div class="dark"><h3>羽昨市の羽昨駅前</h3><img src="https://user-images.githubusercontent.com/106800258/271774889-9437d9eb-0f09-4f5f-abf7-b519d7bba84e.jpg"><p>UFOの町羽咋。気多大社の横にある正覚院の「気多古縁起」という古い巻物の中には、神力自在に飛ぶ物体が登場したということが由来だそうです。コスモアイル羽咋にはロケットや宇宙船の実物が展示されています。【モーゼが訪れる理由：地元のコミュニティの中心で人々と交流し、彼らの日常生活を知るため】</p></div></div><div id="fourteenth-identifier" class="step lefty" data-scrollama-index="13"><div class="dark"><h3>かほく市の考える人の像</h3><img src="https://user-images.githubusercontent.com/106800258/271774986-1c91c87c-c6c9-499d-90b0-bf01eefc801e.jpg"><p>かほく市が生んだ日本近代哲学の偉人、西田幾多郎。幾多郎の生誕地から生い立ちの地、西田幾多郎哲学館、哲学の道、幾多郎のお墓など幾多郎のルーツを巡っていくと、「考える人」が町に浮かびあがります。【モーゼが訪れる理由：芸術を通じて人間の思考を理解し、深く思索するため。】</p></div></div><div id="fifteenth-identifier" class="step lefty" data-scrollama-index="14"><div class="dark"><h3>津幡町の河北潟</h3><img src="https://user-images.githubusercontent.com/106800258/271775022-129a6f18-b8d1-4407-a505-61c6496a1161.jpg"><p>河北潟一周駅伝は箱根駅伝と同じ大正9年（1920年）から始まった日本最古の駅伝であり、開催回数は100回を超える伝統的な大会。襷をつないでゴールテープを切るランナーをゴール地点の津幡町で描きます。【モーゼが訪れる理由：自然の豊かさを感じ取り、その景観の美しさに感謝するため。】</p></div></div><div id="sixteenth-identifier" class="step lefty" data-scrollama-index="15"><div class="dark"><h3>内灘町の内灘海水浴場</h3><img src="https://user-images.githubusercontent.com/106800258/271775074-4daa637e-8ba5-43a0-ae63-0068d019e29f.jpg"><p>毎年5月に内灘海水浴場で行われる内灘 世界の凧の祭典は、県内外そして海外からたくさんの人が集まる凧の祭典です。アート上にある凧会館では凧づくり体験を行うことができ、内灘海岸では凧あげも楽しめます【モーゼが訪れる理由：海の神秘的な美しさと力を体感し、その恵みに感謝するため。】</p></div></div><div id="seventeenth-identifier" class="step lefty" data-scrollama-index="16"><div class="dark"><h3>金沢市の森八本店</h3><img src="https://user-images.githubusercontent.com/106800258/271775532-ef08c2e3-fe18-4315-91e8-28fc28b6b7c0.jpg"><p>金沢では、お正月に梅の形をした紅白の最中、福梅を食べる風習があります。この福梅のルーツは加賀百万石の殿様、前田家の家紋「梅鉢紋」に由来しています。和菓子の町、金沢で和菓子屋さん巡りはいかがでしょう。【モーゼが訪れる理由：地元の伝統的な食文化を尊重し、その風味を味わうため。】</p></div></div><div id="eightteenth-identifier" class="step righty" data-scrollama-index="17"><div class="dark"><h3>金沢市の金沢城</h3><img src="https://user-images.githubusercontent.com/106800258/271775159-4e79eb04-2c5f-4720-bccc-e9eed54a3658.jpg"><p>戦火を免れた金沢は、江戸時代から道筋がほとんど変わっていない城下町。昔ながらの町屋が多数残り、町並みそのものが観光名所。金沢城を中心に武家屋敷跡や金沢五社、金沢三茶屋街、金沢三寺院群などを巡ります。【モーゼが訪れる理由：歴史的な建築物を訪れ、地域の歴史と文化遺産を尊敬するため。】</p></div></div><div id="nineteenth-identifier" class="step lefty" data-scrollama-index="18"><div class="dark"><h3>布市神社</h3><img src="https://user-images.githubusercontent.com/106800258/271776375-65f21d45-c89b-41ee-9606-0acc701401cb.jpg"><p>富樫氏は、室町時代に加賀国を支配した守護大名。それ以前も木曽義仲との対戦や、源義経の勧進帳など歴史の舞台に度々登場しています。守護所を置いた富樫館跡や、富樫氏が建てた布市神社、喜多家住宅などを巡ります。【モーゼが訪れる理由：精神的な場所で祈り、神聖なエネルギーを感じ取るため。】</p></div></div><div id="twentieth-identifier" class="step lefty" data-scrollama-index="19"><div class="dark"><h3>千代の里俳句館</h3><img src="https://user-images.githubusercontent.com/106800258/271775265-54b0ab4f-6de9-480c-ae2c-75202f3808a3.jpg"><p>江戸時代の俳人・千代女は白山市出身。千代女は朝顔の句を多く詠んでいることから、朝顔は白山市の花になっています。若宮八幡宮・明達寺・千代女の里俳句館・本誓寺・聖興寺など白山市の観光スポットを巡ります。【モーゼが訪れる理由：詩を通じて人々の感情や思考を理解し、言葉の力を感じるため。】</p></div></div><div id="twenty-first-identifier" class="step lefty" data-scrollama-index="20"><div class="dark"><h3>白山市の吉田酒造</h3><img src="https://user-images.githubusercontent.com/106800258/271775289-a41a01ca-3379-4fc8-ad72-0f01cdb39ab2.jpg"><p>白山市は霊峰白山から流れる手取川の伏流水と加賀平野の良質な酒米を用いた日本酒の一大生産地として古より知られております。見渡すかぎり田んぼののどかな扇状地。「手取川」吉田酒造、「天狗舞」車多酒造を巡ります。【モーゼが訪れる理由：地域の伝統的な製造技術を尊敬し、その味を楽しむため。】</p></div></div><div id="twenty-second-identifier" class="step lefty" data-scrollama-index="21"><div class="dark"><h3>白山市のフグ安新</h3><img src="https://user-images.githubusercontent.com/106800258/271775373-71ac87a3-1283-48a5-b5f7-1b8efccf6cc7.jpg"><p>霊峰白山の恵み大地のミネラルを大量に含んだ伏流水は、醗酵食文化を生み出しました。江戸時代より伝わる美川ふぐの子糠漬は、猛毒のふぐの卵巣を使った奇跡の発酵食品として文化庁「100年フード」に認定されています。【モーゼが訪れる理由：地域の特産品を尊重し、異なる味を体験するため。】</p></div></div><div id="twenty-third-identifier" class="step lefty" data-scrollama-index="22"><div class="dark"><h3>加賀禅定道</h3><img src="https://user-images.githubusercontent.com/106800258/271775415-5cede19b-c4cd-443b-8a36-799ea1cab4da.jpg"><p>平安時代に開かれた加賀禅定道は巨大な扇状地の頂点にある白山比咩神社を起点に、白山へと至る歴史ある信仰の道。白山に登る修験者の安全を祈願するお守りとして使われていた牛王印を手取川扇状地全体に描きます。【モーゼが訪れる理由：精神的な教えを学び、心の平安を求めるため。】</p></div></div><div id="twenty-fourth-identifier" class="step lefty" data-scrollama-index="23"><div class="dark"><h3>白山手取川ジオパーク</h3><img src="https://user-images.githubusercontent.com/106800258/271775491-320a789b-9b79-4e0d-94f2-736f84977305.jpg"><p>白山手取川ジオパークは2023年、ユネスコ世界ジオパークに認定されました。白山に降った雪が水となり、手取川から日本海に流れる水の旅がテーマです。山頂から加賀禅定道～手取川～日本海までの水の旅を描きます。【モーゼが訪れる理由：地球の歴史と自然の力を学び、その大きさに畏敬の念を抱くため。】</p></div></div><div id="twenty-fifth-identifier" class="step lefty" data-scrollama-index="24"><div class="dark"><h3>川北町の白山が見えるスポット</h3><img src="https://user-images.githubusercontent.com/106800258/271775594-6a37ffb8-e1a7-4914-a7b2-d2e876e50853.jpg"><p>霊峰白山を源とする手取川の右岸にある川北町。川北町は白山と手取川からたくさんの恩恵を受ける一方、手取川の水害との戦いの歴史でもありました。人々の暮らしや文化に大きな影響を与えてきた白山を描きます。【モーゼが訪れる理由：自然の壮大さを見て、その美しさと力に感謝するため。】</p></div></div><div id="twenty-sixth-identifier" class="step lefty" data-scrollama-index="25"><div class="dark"><h3>能美市の松井秀喜像</h3><img src="https://user-images.githubusercontent.com/106800258/271775657-03f3e1f4-8b9d-4b36-b28a-01a381a4d8ca.jpg"><p>巨人・NYヤンキースで活躍した松井秀喜さんは石川県能美市出身。松井秀喜ベースボールミュージアムを起点に松井さんの母校（浜小学校、根上中学）をはじめ、根上りの松、弁慶謝罪の地などを巡ります。【モーゼが訪れる理由：地元の英雄を讃え、人々の誇りを共有するため。】</p></div></div><div id="twenty-seventh-identifier" class="step lefty" data-scrollama-index="26"><div class="dark"><h3>能美古墳群</h3><img src="https://user-images.githubusercontent.com/106800258/271775694-b806c259-674d-4807-ab6e-82162fa2fc75.jpg"><p>能美古墳群、寺井山→末寺山→和田山（２座）→秋常山→西山を繋ぎ埴輪を描きます。能美ふるさとミュージアムでは遺跡で発掘された壺や宝剣・埴輪などを見学。今年は加賀立国能美誕生1200年。能美市のルーツを探ります。【モーゼが訪れる理由：過去の文化を理解し、歴史の重要性を学ぶため。</p></div></div><div id="twenty-eighth-identifier" class="step lefty" data-scrollama-index="27"><div class="dark"><h3>加賀市のご当地マンホール</h3><img src="https://user-images.githubusercontent.com/106800258/271775776-f09edb86-1481-401f-a1f2-e32b2fb4c4e4.jpg"><p>加賀市にはラムサール条約に登録されている日本有数の鴨の越冬池や、江戸時代より伝わる伝統的鴨漁「坂網漁」など鴨にちなんだものが有名です。加賀市大聖寺で加賀市の公式キャラクターかも丸くんを描きます。【モーゼが訪れる理由：地域のユニークな特徴を楽しみ、その個性を尊敬するため。】</p></div></div><div id="twenty-ninth-identifier" class="step lefty" data-scrollama-index="28"><div class="dark"><h3>加賀市の芭蕉の館</h3><img src="https://user-images.githubusercontent.com/106800258/271775854-4c396353-5b8f-46f2-addf-22f777ba85b3.jpg"><p>開湯1300年の歴史を持つ山中温泉は、芭蕉が称賛した日本三大名湯の1つ。1689年夏、奥の細道の道中、松尾芭蕉は山中温泉に長期にわたって滞在しました。山中温泉の数々の名所旧跡には芭蕉の句が残されています。【モーゼが訪れる理由：地域の文化と歴史を尊重し、その知識を深めるため。】</p></div></div><div id="thirtieth-identifier" class="step lefty" data-scrollama-index="29"><div class="dark"><h3>加賀市の山の文化館</h3><img src="https://user-images.githubusercontent.com/106800258/271775894-1160aa4b-f515-4490-9e23-a688e8cc86cf.jpg"><p>日本人はたいていふるさとの山を持っている。「日本百名山」著者、深田久弥は加賀市大聖寺出身。深田久弥山の文化館でルーツを探り、久弥が愛した白山を眺めながら生まれ育った大聖寺の城下町をめぐります。【モーゼが訪れる理由：地域の多様性と独自性を尊重し、人々との絆を深め、神の教えを広めるために訪れました。】</p></div></div><div id="thirty-first-identifier" class="step lefty" data-scrollama-index="30"><div class="dark"><h3>宝達志水町の伝説の森モーゼパーク</h3><img src="https://user-images.githubusercontent.com/106800258/271774930-65863e79-091e-4ed2-9c30-8e7cad1e1af8.jpg"><p>宝達志水町モーゼパークには、旧約聖書「十戒」で海を割ったモーゼの墓があります。ユダヤの民衆をイスラエルの地へ導いた後、不思議な天浮船で宝達山にどり着き、余生をこの地で過ごしたという言い伝えがあります。</p></div></div><div id="thirty-eighth-chapter" class="step centered" data-scrollama-index="31"><div class="dark"><h3>締め</h3><p>いかがでしょうか？GPTモーゼはなかなかに好奇心なモーゼでしたね。このモーゼは、地理的な位置、歴史的・文化的な重要性、そして各地の特徴に基づいてルートを選択した、、？そうです！是非一度、モーゼになりきって石川観光してみてください！ありがとうございました！</p></div></div></div><div class="dark" id="footer"><p>Source: source citations, etc. <br> Created using <a href="https://github.com/mapbox/storytelling" target="_blank">Mapbox Storytelling</a> template.</p></div></div>
+
+<script src="./config.js"></script>
+<script>
+var initLoad = true;
+var layerTypes = {
+    'fill': ['fill-opacity'],
+    'line': ['line-opacity'],
+    'circle': ['circle-opacity', 'circle-stroke-opacity'],
+    'symbol': ['icon-opacity', 'text-opacity'],
+    'raster': ['raster-opacity'],
+    'fill-extrusion': ['fill-extrusion-opacity'],
+    'heatmap': ['heatmap-opacity']
+}
+
+var alignments = {
+    'left': 'lefty',
+    'center': 'centered',
+    'right': 'righty',
+    'full': 'fully'
+}
+
+function getLayerPaintType(layer) {
+    var layerType = map.getLayer(layer).type;
+    return layerTypes[layerType];
+}
+
+function setLayerOpacity(layer) {
+    var paintProps = getLayerPaintType(layer.layer);
+    paintProps.forEach(function(prop) {
+        var options = {};
+        if (layer.duration) {
+            var transitionProp = prop + "-transition";
+            options = { "duration": layer.duration };
+            map.setPaintProperty(layer.layer, transitionProp, options);
+        }
+        map.setPaintProperty(layer.layer, prop, layer.opacity, options);
+    });
+}
+
+var story = document.getElementById('story');
+var features = document.createElement('div');
+features.setAttribute('id', 'features');
+
+var header = document.createElement('div');
+
+if (config.title) {
+    var titleText = document.createElement('h1');
+    titleText.innerText = config.title;
+    header.appendChild(titleText);
+}
+
+if (config.subtitle) {
+    var subtitleText = document.createElement('h2');
+    subtitleText.innerText = config.subtitle;
+    header.appendChild(subtitleText);
+}
+
+if (config.byline) {
+    var bylineText = document.createElement('p');
+    bylineText.innerText = config.byline;
+    header.appendChild(bylineText);
+}
+
+if (header.innerText.length > 0) {
+    header.classList.add(config.theme);
+    header.setAttribute('id', 'header');
+    story.appendChild(header);
+}
+
+config.chapters.forEach((record, idx) => {
+    var container = document.createElement('div');
+    var chapter = document.createElement('div');
+
+    if (record.title) {
+        var title = document.createElement('h3');
+        title.innerText = record.title;
+        chapter.appendChild(title);
+    }
+
+    if (record.image) {
+        var image = new Image();
+        image.src = record.image;
+        chapter.appendChild(image);
+    }
+
+    if (record.description) {
+        var story = document.createElement('p');
+        story.innerHTML = record.description;
+        chapter.appendChild(story);
+    }
+
+    container.setAttribute('id', record.id);
+    container.classList.add('step');
+    if (idx === 0) {
+        container.classList.add('active');
+    }
+
+    chapter.classList.add(config.theme);
+    container.appendChild(chapter);
+    container.classList.add(alignments[record.alignment] || 'centered');
+    if (record.hidden) {
+        container.classList.add('hidden');
+    }
+    features.appendChild(container);
+});
+
+story.appendChild(features);
+
+var footer = document.createElement('div');
+
+if (config.footer) {
+    var footerText = document.createElement('p');
+    footerText.innerHTML = config.footer;
+    footer.appendChild(footerText);
+}
+
+if (footer.innerText.length > 0) {
+    footer.classList.add(config.theme);
+    footer.setAttribute('id', 'footer');
+    story.appendChild(footer);
+}
+
+mapboxgl.accessToken = config.accessToken;
+
+const transformRequest = (url) => {
+    const hasQuery = url.indexOf("?") !== -1;
+    const suffix = hasQuery ? "&pluginName=scrollytellingV2" : "?pluginName=scrollytellingV2";
+    return {
+      url: url + suffix
+    }
+}
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: config.style,
+    center: config.chapters[0].location.center,
+    zoom: config.chapters[0].location.zoom,
+    bearing: config.chapters[0].location.bearing,
+    pitch: config.chapters[0].location.pitch,
+    interactive: false,
+    transformRequest: transformRequest,
+    projection: config.projection
+});
+
+// Create a inset map if enabled in config.js
+if (config.inset) {
+ var insetMap = new mapboxgl.Map({
+    container: 'mapInset', // container id
+    style: 'mapbox://styles/mapbox/dark-v10', //hosted style id
+    center: config.chapters[0].location.center,
+    // Hardcode above center value if you want insetMap to be static.
+    zoom: 3, // starting zoom
+    hash: false,
+    interactive: false,
+    attributionControl: false,
+    //Future: Once official mapbox-gl-js has globe view enabled,
+    //insetmap can be a globe with the following parameter.
+    //projection: 'globe'
+  });
+}
+
+if (config.showMarkers) {
+    var marker = new mapboxgl.Marker({ color: config.markerColor });
+    marker.setLngLat(config.chapters[0].location.center).addTo(map);
+}
+
+// instantiate the scrollama
+var scroller = scrollama();
+
+
+map.on("load", function() {
+    if (config.use3dTerrain) {
+        map.addSource('mapbox-dem', {
+            'type': 'raster-dem',
+            'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+            'tileSize': 512,
+            'maxzoom': 14
+        });
+        // add the DEM source as a terrain layer with exaggerated height
+        map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
+
+        // add a sky layer that will show when the map is highly pitched
+        map.addLayer({
+            'id': 'sky',
+            'type': 'sky',
+            'paint': {
+                'sky-type': 'atmosphere',
+                'sky-atmosphere-sun': [0.0, 0.0],
+                'sky-atmosphere-sun-intensity': 15
+            }
+        });
+    };
+
+    // As the map moves, grab and update bounds in inset map.
+    if (config.inset) {
+    map.on('move', getInsetBounds);
+    }
+    // setup the instance, pass callback functions
+    scroller
+    .setup({
+        step: '.step',
+        offset: 0.5,
+        progress: true
+    })
+    .onStepEnter(async response => {
+        var current_chapter = config.chapters.findIndex(chap => chap.id === response.element.id);
+        var chapter = config.chapters[current_chapter];
+        
+        response.element.classList.add('active');
+        map[chapter.mapAnimation || 'flyTo'](chapter.location);
+
+        // Incase you do not want to have a dynamic inset map,
+        // rather want to keep it a static view but still change the
+        // bbox as main map move: comment out the below if section.
+        if (config.inset) {
+          if (chapter.location.zoom < 5) {
+            insetMap.flyTo({center: chapter.location.center, zoom: 0});
+          }
+          else {
+            insetMap.flyTo({center: chapter.location.center, zoom: 3});
+          }
+        }
+        if (config.showMarkers) {
+            marker.setLngLat(chapter.location.center);
+        }
+        if (chapter.onChapterEnter.length > 0) {
+            chapter.onChapterEnter.forEach(setLayerOpacity);
+        }
+        if (chapter.callback) {
+            window[chapter.callback]();
+        }
+        if (chapter.rotateAnimation) {
+            map.once('moveend', () => {
+                const rotateNumber = map.getBearing();
+                map.rotateTo(rotateNumber + 180, {
+                    duration: 30000, easing: function (t) {
+                        return t;
+                    }
+                });
+            });
+        }
+        if (config.auto) {
+             var next_chapter = (current_chapter + 1) % config.chapters.length;
+             map.once('moveend', () => {
+                 document.querySelectorAll('[data-scrollama-index="' + next_chapter.toString() + '"]')[0].scrollIntoView();
+             });
+        }
+    })
+    .onStepExit(response => {
+        var chapter = config.chapters.find(chap => chap.id === response.element.id);
+        response.element.classList.remove('active');
+        if (chapter.onChapterExit.length > 0) {
+            chapter.onChapterExit.forEach(setLayerOpacity);
+        }
+    });
+
+
+    if (config.auto) {
+        document.querySelectorAll('[data-scrollama-index="0"]')[0].scrollIntoView();
+    }
+});
+
+//Helper functions for insetmap
+function getInsetBounds() {
+            let bounds = map.getBounds();
+
+            let boundsJson = {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [
+                                    bounds._sw.lng,
+                                    bounds._sw.lat
+                                ],
+                                [
+                                    bounds._ne.lng,
+                                    bounds._sw.lat
+                                ],
+                                [
+                                    bounds._ne.lng,
+                                    bounds._ne.lat
+                                ],
+                                [
+                                    bounds._sw.lng,
+                                    bounds._ne.lat
+                                ],
+                                [
+                                    bounds._sw.lng,
+                                    bounds._sw.lat
+                                ]
+                            ]
+                        ]
+                    }
+                }]
+            }
+
+            if (initLoad) {
+                addInsetLayer(boundsJson);
+                initLoad = false;
+            } else {
+                updateInsetLayer(boundsJson);
+            }
+
+        }
+
+function addInsetLayer(bounds) {
+    insetMap.addSource('boundsSource', {
+        'type': 'geojson',
+        'data': bounds
+    });
+
+    insetMap.addLayer({
+        'id': 'boundsLayer',
+        'type': 'fill',
+        'source': 'boundsSource', // reference the data source
+        'layout': {},
+        'paint': {
+            'fill-color': '#fff', // blue color fill
+            'fill-opacity': 0.2
+        }
+    });
+    // // Add a black outline around the polygon.
+    insetMap.addLayer({
+        'id': 'outlineLayer',
+        'type': 'line',
+        'source': 'boundsSource',
+        'layout': {},
+        'paint': {
+            'line-color': '#000',
+            'line-width': 1
+        }
+    });
+}
+
+function updateInsetLayer(bounds) {
+    insetMap.getSource('boundsSource').setData(bounds);
+}
+
+
+
+// setup resize event
+window.addEventListener('resize', scroller.resize);
+
+</script>
+
+
+
+</body></html>
